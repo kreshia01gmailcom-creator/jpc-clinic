@@ -1,0 +1,20 @@
+{
+    "name": "JPC Clinic",
+    "short_name": "JPC Clinic",
+    "start_url": "/",
+    "background_color": "#0D6EFD",
+    "theme_color": "#0A2472",
+    "display": "standalone",
+    "icons": [
+        {
+            "src": "/logo/mia192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/logo/mia512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
