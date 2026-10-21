@@ -118,7 +118,7 @@ export default function Login({ onLogin, onManualLogin }) {
                             autoComplete="username"
                         />
                     </label>
-                    <h1>sdhsjdhdhaj</h1>
+                    
                     <label>
                         Password
                         <input
@@ -135,7 +135,7 @@ export default function Login({ onLogin, onManualLogin }) {
                     </button>
                 </form>
 
-                <div style={{ textAlign: 'center', margin: '18px 0 14px', color: '#6b6b6b' }}>
+                <div style={{ textAlign: 'center', margin: '18px 0 14px', color: 'var(--muted)' }}>
                     or
                 </div>
 

@@ -15,16 +15,27 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 );
 
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker
-            .register('/sw.js')
-            .then((registration) => {
-                console.log('✅ Service Worker Registered!');
-                console.log('Scope:', registration.scope);
-            })
-            .catch((error) => {
-                console.error('❌ Service Worker Registration Failed!');
-                console.error(error);
-            });
-    });
+    if (import.meta.env.PROD) {
+        // Production lang ang may Service Worker
+        window.addEventListener('load', () => {
+            navigator.serviceWorker
+                .register('/sw.js')
+                .then((registration) => {
+                    console.log('✅ Service Worker Registered!');
+                    console.log('Scope:', registration.scope);
+                })
+                .catch((error) => {
+                    console.error('❌ Service Worker Registration Failed!');
+                    console.error(error);
+                });
+        });
+    } else {
+        // Sa development: burahin ang lumang Service Worker at cache para hindi lumang code ang lumabas
+        navigator.serviceWorker.getRegistrations().then((regs) => {
+            regs.forEach((r) => r.unregister());
+        });
+        if (window.caches) {
+            caches.keys().then((keys) => keys.forEach((k) => caches.delete(k)));
+        }
+    }
 }

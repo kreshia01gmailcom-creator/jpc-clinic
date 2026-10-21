@@ -59,7 +59,6 @@ export default function Dashboard() {
                     title="Medicines Dispensed"
                     value={medicines.filter((x) => x.available === 'Yes').length}
                 />
-                <Stat icon="thermometer-half" title="Avg Temperature" value={avg + ' °C'} />
                 <Stat icon="person-check-fill" title="Staff Logged In" value={user?.level || 'Staff'} />
             </div>
 
@@ -112,55 +111,6 @@ export default function Dashboard() {
                         </Link>
                     </div>
                 </div>
-            </div>
-
-           
-            <div className="panel">
-                <div className="panel-title">Add Patient</div>
-                <form onSubmit={addPatient} className="form">
-                    <input
-                        placeholder="Name"
-                        value={newPatient.name}
-                        onChange={(e) => setNewPatient({ ...newPatient, name: e.target.value })}
-                    />
-                    <input
-                        placeholder="Age"
-                        value={newPatient.age}
-                        onChange={(e) => setNewPatient({ ...newPatient, age: e.target.value })}
-                    />
-                    <select
-                        value={newPatient.level}
-                        onChange={(e) => setNewPatient({ ...newPatient, level: e.target.value })}
-                    >
-                        <option value="">Select Level</option>
-                        <option>Basic Education</option>
-                        <option>Higher Education</option>
-                    </select>
-                    <button className="primary-btn">Save</button>
-                </form>
-            </div>
-
-           
-            <div className="panel">
-                <div className="panel-title">Patients List</div>
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Age</th>
-                            <th>Level</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {patients.map((p) => (
-                            <tr key={p.id}>
-                                <td>{p.name}</td>
-                                <td>{p.age}</td>
-                                <td>{p.level}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
             </div>
         </>
     );

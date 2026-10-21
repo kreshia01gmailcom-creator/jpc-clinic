@@ -32,10 +32,11 @@ import Medicines from './pages/Medicines.jsx';
 import Reports from './pages/Reports.jsx';
 import Profile from './pages/Profile.jsx';
 import StudentPortal from './pages/StudentPortal.jsx';
+import StudentTable from './pages/StudentTable.jsx'; // NEW
 
 export default function App() {
   const [user, setUser] = useState(null);
-  const [role, setRole] = useState(null); // Stores 'admin', 'editor', 'student', etc.
+  const [role, setRole] = useState(null); 
   const [loading, setLoading] = useState(true);
 
   
@@ -180,6 +181,19 @@ export default function App() {
               </RequireAuth>
             }
           />
+
+          {/* NEW: Student table (galing sa Express, port 8080) */}
+          <Route
+            path="/studenttable"
+            element={
+              <RequireAuth>
+                <Layout>
+                  <StudentTable />
+                </Layout>
+              </RequireAuth>
+            }
+          />
+
           <Route
             path="/students/new"
             element={

@@ -89,7 +89,7 @@ export default function AdminLogin() {
                     <button className="primary-btn">Login</button>
                 </form>
 
-                <div style={{ textAlign: 'center', margin: '12px 0', color: '#6b6b6b' }}>
+                <div style={{ textAlign: 'center', margin: '12px 0', color: 'var(--muted)' }}>
                     or
                 </div>
 

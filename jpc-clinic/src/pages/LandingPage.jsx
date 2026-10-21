@@ -131,31 +131,31 @@ export default function LandingPage({ onLogin }) {
                     <div className="hcard-grid">
                         <VitalChip icon="thermometer-half" label="Temp" value="36.8°C" color="var(--blue)" />
                         <VitalChip icon="heart-pulse" label="Heart Rate" value="78 bpm" color="var(--green)" />
-                        <VitalChip icon="droplet-half" label="Blood Pressure" value="120/80" color="#b48bff" />
+                        <VitalChip icon="droplet-half" label="Blood Pressure" value="120/80" color="#F0ABFC" />
                         <VitalChip icon="lungs" label="SpO₂" value="98%" color="var(--yellow)" />
                     </div>
                 </div>
             </section>
 
-            
+           
             <section className="landing-features">
                 <h2 className="features-title">What the Clinic System Offers</h2>
                 <div className="features-grid">
                     <FeatureCard
                         icon="clipboard2-pulse"
-                        color="#4a7fe8"
+                        color="#B794F4"
                         title="Vital Signs Monitoring"
                         desc="Track blood pressure, heart rate, temperature, respiratory rate, and SpO₂ for every student visit."
                     />
                     <FeatureCard
                         icon="capsule"
-                        color="#41b883"
+                        color="#5EEAD4"
                         title="Medicine Dispensing"
                         desc="Record medications given to students. When a medicine is unavailable, admin advice is saved for the student."
                     />
                     <FeatureCard
                         icon="person-check-fill"
-                        color="#b48bff"
+                        color="#F0ABFC"
                         title="Student Health Portal"
                         desc="Students can view their own health records — vitals, dispensed medicines, and clinic advice — anytime."
                     />

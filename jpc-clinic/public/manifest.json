@@ -1,18 +1,18 @@
 {
-    "name": "JPC Clinic",
+    "name": "JPC School Clinic",
     "short_name": "JPC Clinic",
     "start_url": "/",
-    "background_color": "#0D6EFD",
-    "theme_color": "#0A2472",
+    "background_color": "#1E1A2E",
+    "theme_color": "#1E1A2E",
     "display": "standalone",
     "icons": [
         {
-            "src": "/logo/mia192.png",
+            "src": "/logo/heart-192.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "/logo/mia512.png",
+            "src": "/logo/heart-512.png",
             "sizes": "512x512",
             "type": "image/png"
         }

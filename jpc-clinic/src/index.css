@@ -1380,3 +1380,31 @@ td {
 @media(max-width:480px) {
     .sp-vitals-row { grid-template-columns:1fr; }
 }
+
+/* ===== LAVENDER THEME OVERRIDE ===== */
+:root{--bg:#1E1A2E;--side:#17132A;--panel:#2A2342;--input:#221C36;--border:#453B6B;--text:#F3EEFF;--muted:#B8AED6;--blue:#B794F4;--green:#5EEAD4;--yellow:#f2c94c;}
+.brand-icon{background:rgba(183,148,244,.15);}
+.activity-icon{background:rgba(183,148,244,.12);}
+.level-pill,.badge-soft{background:rgba(183,148,244,.12);color:#D6BCFA;border-color:rgba(183,148,244,.25);}
+.panel-title a,.sp-footer a{color:#D6BCFA;}
+.primary-btn,.landing-cta-sm,.hero-btn-primary,.s-login-btn{background:var(--blue);color:#1E1A2E;}
+.primary-btn:hover,.landing-cta-sm:hover,.hero-btn-primary:hover{background:#9F7AEA;}
+.landing-page{background:linear-gradient(135deg,#17132A 0%,#1E1A2E 60%,#2A2342 100%);}
+.hero-badge{background:rgba(183,148,244,.15);border-color:rgba(183,148,244,.3);color:#D6BCFA;}
+.hero-accent{background:linear-gradient(90deg,#B794F4,#5EEAD4);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.feature-card:hover{border-color:rgba(183,148,244,.35);}
+.sp-welcome{background:linear-gradient(135deg,rgba(183,148,244,.12),rgba(94,234,212,.06));border-color:rgba(183,148,244,.2);}
+.sp-welcome-icon{background:rgba(183,148,244,.18);}
+.sp-badge{background:rgba(183,148,244,.15);color:#D6BCFA;}
+.login-card{background:var(--panel);color:var(--text);}
+.login-logo{background:rgba(183,148,244,.18);color:var(--blue);}
+.login-card>p,.login-note,.login-back a{color:var(--muted);}
+.login-card input,.login-card select{background:var(--input);border-color:var(--border);color:var(--text);}
+.login-card .primary-btn{background:var(--blue);color:#1E1A2E;}
+.login-card .primary-btn:hover{background:#9F7AEA;}
+.student-login-page .login-card{background:var(--panel);}
+.student-login-logo{background:rgba(183,148,244,.18)!important;color:var(--blue)!important;}
+.student-login-card .primary-btn,.s-login-btn{background:var(--blue);color:#1E1A2E;}
+.s-alert-error,.login-card .alert-danger{background:rgba(251,113,133,.12);color:#FB7185;border:1px solid rgba(251,113,133,.3);}
+@media(min-width:901px){.stats{grid-template-columns:repeat(3,1fr);}}
+

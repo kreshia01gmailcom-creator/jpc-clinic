@@ -1,4 +1,4 @@
-const CACHE_NAME = "jpc-clinic-v1";
+const CACHE_NAME = "jpc-clinic-v2";
 
 const FILES_TO_CACHE = [
     "/",
@@ -7,8 +7,8 @@ const FILES_TO_CACHE = [
     "/css/bootstrap.min.css",
     "/css/style.css",
     "/js/app.js",
-    "/logo/mia192.png",
-    "/logo/mia512.png"
+    "/logo/heart-192.png",
+    "/logo/heart-512.png"
 ];
 
 self.addEventListener("install", event => {
