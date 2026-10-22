@@ -42,33 +42,39 @@ export default function App() {
   
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser); 
+      try {
+        if (currentUser) {
+          setUser(currentUser); 
 
-        
-        const userRef = doc(db, 'users', currentUser.uid);
-        const userSnap = await getDoc(userRef);
+          
+          const userRef = doc(db, 'users', currentUser.uid);
+          const userSnap = await getDoc(userRef);
 
-        if (userSnap.exists()) {
-          // Fetch existing role
-          setRole(userSnap.data().role || 'student');
+          if (userSnap.exists()) {
+            // Fetch existing role
+            setRole(userSnap.data().role || 'student');
+          } else {
+           
+            const defaultRole = 'student'; 
+            await setDoc(userRef, {
+              displayName: currentUser.displayName,
+              email: currentUser.email,
+              photoURL: currentUser.photoURL,
+              role: defaultRole,
+              createdAt: serverTimestamp()
+            });
+            setRole(defaultRole);
+          }
         } else {
-         
-          const defaultRole = 'student'; 
-          await setDoc(userRef, {
-            displayName: currentUser.displayName,
-            email: currentUser.email,
-            photoURL: currentUser.photoURL,
-            role: defaultRole,
-            createdAt: serverTimestamp()
-          });
-          setRole(defaultRole);
+          setUser(null);
+          setRole(null);
         }
-      } else {
-        setUser(null);
-        setRole(null);
+      } catch (error) {
+        // Kapag nag-error ang Firestore (hal. permissions), hindi na maiipit sa "Loading"
+        console.error("Failed to load user data:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();

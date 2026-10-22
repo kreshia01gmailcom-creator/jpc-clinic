@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "firstName": "Erica",
+    "lastName": "Escayde",
+    "grade": "BSIT-3B",
+    "date": "2026-10-09"
+  },
+  {
+    "id": 2,
+    "firstName": "Heart",
+    "lastName": "Lanugo",
+    "grade": "BSTM-3B",
+    "date": "2026-10-04"
+  }
+]
