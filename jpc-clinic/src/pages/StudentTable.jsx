@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_URL } from "../config.js";
 
 export default function StudentTable() {
   const [ students, setStudents ] = useState([]);
@@ -10,7 +11,7 @@ export default function StudentTable() {
   const [ editgrade, seteditGrade ] = useState('');
   const [ editdate, seteditDate ] = useState('');
   const [ isModalOpen, setisModalOpen ] = useState(false);
-  const student_url = 'http://localhost:8080/api/students';
+  const student_url = `${API_URL}/api/students`;
 
   
   const cellStyle = { textAlign: 'center', verticalAlign: 'middle' };

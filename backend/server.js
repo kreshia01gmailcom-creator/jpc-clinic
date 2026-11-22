@@ -1,112 +1,163 @@
 const express = require('express');
 const cors = require('cors');
-const PORT = process.env.PORT || 8080
-const fs = require('fs');
-const path = require('path');
+const mysql = require('mysql2/promise');
+const PORT = process.env.PORT || 8080;
 
 const app = express();
 
-app.use(express.json());
-app.use(cors());
+// ====== Database connection (galing sa environment variables) ======
+const db = mysql.createPool({
+    host: process.env.DB_HOST || 'localhost',
+    port: Number(process.env.DB_PORT) || 3306,
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'jpc_clinic_db',
+    dateStrings: true, // para 'YYYY-MM-DD' ang date sa students
+    // Kailangan ng TiDB ang SSL/TLS
+    ssl: process.env.DB_SSL === 'true'
+        ? { minVersion: 'TLSv1.2', rejectUnauthorized: true }
+        : undefined,
+    waitForConnections: true,
+    connectionLimit: 5
+});
 
-
-const DATA_FILE = path.join(__dirname, 'students.json');
-
-const defaultStudents = [
-  { id: 1, firstName: 'Carlos', lastName: 'Gomez', grade: 'Grade 10', date: '2026-10-02' },
-  { id: 2, firstName: 'Heart', lastName: 'Lanugo', grade: 'Grade 12', date: '2026-10-02' }
-];
-
-
-function loadStudents() {
-  try {
-    if (!fs.existsSync(DATA_FILE)) {
-      fs.writeFileSync(DATA_FILE, JSON.stringify(defaultStudents, null, 2));
-      return [...defaultStudents];
+async function checkConnection() {
+    try {
+        const conn = await db.getConnection();
+        console.log('Database Connected');
+        conn.release();
+    } catch (err) {
+        console.log('Database NOT connected:', err.message);
     }
-    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-  } catch (err) {
-    console.error('Error reading students.json:', err);
-    return [...defaultStudents];
-  }
 }
+checkConnection();
 
+app.use(express.json());
+app.use(cors({
+    origin: process.env.FRONTEND_URL || '*'
+}));
 
-function saveStudents() {
-  try {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(students, null, 2));
-  } catch (err) {
-    console.error('Error saving students.json:', err);
-  }
-}
-
-let students = loadStudents();
-let nextId = students.length ? Math.max(...students.map(s => s.id)) + 1 : 1;
-
-
-app.get('/api/students', (req, res) => {
-  res.json(students);
+// Health check (para sa Render)
+app.get('/', (req, res) => {
+    res.json({ status: 'JPC Clinic backend is running' });
 });
 
-
-app.post('/api/students', (req, res) => {
-  const { firstName, lastName, grade, date } = req.body;
-
-  if (!firstName || !lastName || !grade) {
-    return res.status(400).json({ error: 'Kulang ang data' });
-  }
-
-  const newStudent = {
-    id: nextId++,
-    firstName,
-    lastName,
-    grade,
-    date: date || new Date().toISOString().slice(0, 10)
-  };
-  students.push(newStudent);
-  saveStudents();
-  res.status(201).json(newStudent);
+// ====== /api/user ======
+app.get('/api/user', async (req, res) => {
+    try {
+        const [user] = await db.query('SELECT * FROM `user`');
+        res.json(user);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
-
-
-app.put('/api/students/:id', (req, res) => {
-  const { id } = req.params;
-
-  
-  const editID = students.findIndex((s) => s.id === Number(id));
-
-  students[editID] = {
-    id: Number(id),
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    grade: req.body.grade,
-    date: req.body.date
-  };
-
-  saveStudents();
-  res.json(students[editID]);
-  console.log(students[editID]);
+app.post('/api/user', async (req, res) => {
+    try {
+        await db.query('INSERT INTO `user` (name, role) VALUES (?,?) ', [req.body.name, req.body.role]);
+        res.json({ message: 'User added' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
+app.delete('/api/user/:id', async (req, res) => {
+    try {
+        await db.query('DELETE FROM `user` WHERE user_id = ?', [req.params.id]);
+        res.json({ message: 'User deleted' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/user/:id', async (req, res) => {
+    try {
+        await db.query('UPDATE `user` SET name = ?, role = ? WHERE user_id = ?', [req.body.name, req.body.role, req.params.id]);
+        res.json({ message: 'User updated' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ====== /api/students ======
+const STUDENT_FIELDS = `
+    student_id AS id,
+    first_name AS firstName,
+    last_name AS lastName,
+    grade_level AS grade,
+    date_registered AS date
+`;
+
+app.get('/api/students', async (req, res) => {
+    try {
+        const [students] = await db.query(`SELECT ${STUDENT_FIELDS} FROM students`);
+        res.json(students);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/students', async (req, res) => {
+    const { firstName, lastName, grade, date } = req.body;
+
+    if (!firstName || !lastName || !grade) {
+        return res.status(400).json({ error: 'Kulang ang data' });
+    }
+
+    const studentDate = date || new Date().toISOString().slice(0, 10);
+
+    try {
+        const [result] = await db.query(
+            'INSERT INTO students (first_name, last_name, grade_level, date_registered) VALUES (?, ?, ?, ?)',
+            [firstName, lastName, grade, studentDate]
+        );
+        res.status(201).json({ id: result.insertId, firstName, lastName, grade, date: studentDate });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/students/:id', async (req, res) => {
+    const { id } = req.params;
+    const { firstName, lastName, grade, date } = req.body;
+
+    try {
+        const [result] = await db.query(
+            'UPDATE students SET first_name = ?, last_name = ?, grade_level = ?, date_registered = ? WHERE student_id = ?',
+            [firstName, lastName, grade, date, id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Student not found' });
+        }
+
+        const updatedStudent = { id: Number(id), firstName, lastName, grade, date };
+        res.json(updatedStudent);
+        console.log(updatedStudent);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 // DELETE - burahin ang student
-app.delete('/api/students/:id', (req, res) => {
-  const { id } = req.params;
+app.delete('/api/students/:id', async (req, res) => {
+    const { id } = req.params;
 
-  const deleteIndex = students.findIndex((s) => s.id === Number(id));
+    try {
+        const [rows] = await db.query(`SELECT ${STUDENT_FIELDS} FROM students WHERE student_id = ?`, [id]);
 
-  if (deleteIndex === -1) {
-    return res.status(404).json({ error: 'Student not found' });
-  }
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Student not found' });
+        }
 
-  const deletedStudent = students.splice(deleteIndex, 1)[0];
-
-  saveStudents();
-  res.json({ message: 'Student deleted', student: deletedStudent });
-  console.log('Deleted:', deletedStudent);
+        await db.query('DELETE FROM students WHERE student_id = ?', [id]);
+        res.json({ message: 'Student deleted', student: rows[0] });
+        console.log('Deleted:', rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 app.listen(PORT, () => {
-  console.log(`JPC Clinic backend running on port ${PORT}`);
+    console.log(`JPC Clinic backend running on port ${PORT}`);
 });

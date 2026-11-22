@@ -4,6 +4,7 @@ import { auth, googleProvider, db } from '../firebase';
 import { signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
 import { collection, doc, getDoc, getDocs, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext.jsx';
+import { API_URL } from '../config.js';
 
 export default function Login({ onLogin, onManualLogin }) {
     const [email, setEmail] = useState('');
@@ -48,7 +49,7 @@ export default function Login({ onLogin, onManualLogin }) {
         event.preventDefault() //prevent refresh
         console.log(name);
         try {
-            await fetch("http://localhost:8080/api/students", {
+            await fetch(`${API_URL}/api/students`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -164,11 +165,11 @@ export default function Login({ onLogin, onManualLogin }) {
                 </button>
 
                 <small className="login-note">
-                    Role (Admin or User) is automatically scanned from Firebase.
+                   Only registered JPC accounts can sign in.
                 </small>
 
                 <div className="login-back">
-                    <Link to="/">← Back to Home</Link>
+                    <Link to="/">Back to Home</Link>
                 </div>
             </div>
         </div>
