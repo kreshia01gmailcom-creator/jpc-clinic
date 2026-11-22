@@ -32,7 +32,7 @@ async function checkConnection() {
 }
 checkConnection();
 
-app.use(express.json());
+app.use(express.json({ limit: '2mb' }));
 app.use(cors({
     origin: process.env.FRONTEND_URL || '*'
 }));
@@ -153,6 +153,56 @@ app.delete('/api/students/:id', async (req, res) => {
         await db.query('DELETE FROM students WHERE student_id = ?', [id]);
         res.json({ message: 'Student deleted', student: rows[0] });
         console.log('Deleted:', rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ====== /api/records (clinic data: students, vitals, medicines, visits) ======
+const RECORD_KINDS = ['students', 'vitals', 'medicines', 'visits'];
+
+// Kunin lahat ng clinic records
+app.get('/api/records', async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            'SELECT kind, id, data FROM clinic_records ORDER BY created_at DESC'
+        );
+
+        const out = { students: [], vitals: [], medicines: [], visits: [] };
+        for (const row of rows) {
+            const data = typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
+            if (out[row.kind]) {
+                out[row.kind].push({ ...data, id: row.id });
+            }
+        }
+        res.json(out);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Mag-save ng isa o maraming records (kapag existing na ang id, ina-update)
+app.post('/api/records/:kind', async (req, res) => {
+    const { kind } = req.params;
+
+    if (!RECORD_KINDS.includes(kind)) {
+        return res.status(400).json({ error: 'Invalid kind' });
+    }
+
+    const items = (Array.isArray(req.body) ? req.body : [req.body])
+        .filter((item) => item && item.id !== undefined && item.id !== null);
+
+    if (items.length === 0) {
+        return res.status(400).json({ error: 'Kulang ang data' });
+    }
+
+    try {
+        const rows = items.map(({ id, ...data }) => [kind, String(id), JSON.stringify(data)]);
+        await db.query(
+            'INSERT INTO clinic_records (kind, id, data) VALUES ? ON DUPLICATE KEY UPDATE data = VALUES(data)',
+            [rows]
+        );
+        res.status(201).json({ saved: rows.length });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
