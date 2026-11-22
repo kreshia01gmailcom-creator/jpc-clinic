@@ -169,7 +169,7 @@ export default function Login({ onLogin, onManualLogin }) {
                 </small>
 
                 <div className="login-back">
-                    <Link to="/">Back to Home</Link>
+                    <Link to="/">Back to Homee</Link>
                 </div>
             </div>
         </div>
