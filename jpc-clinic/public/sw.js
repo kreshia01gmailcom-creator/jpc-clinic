@@ -1,22 +1,16 @@
-const CACHE_NAME = "jpc-clinic-v2";
+const CACHE_NAME = "jpc-clinic-v3";
 
 const FILES_TO_CACHE = [
     "/",
     "/index.html",
     "/manifest.json",
-    "/css/bootstrap.min.css",
-    "/css/style.css",
-    "/js/app.js",
     "/logo/heart-192.png",
     "/logo/heart-512.png"
 ];
 
 self.addEventListener("install", event => {
-    console.log("Service Worker: Installing...");
-
     event.waitUntil(
         caches.open(CACHE_NAME).then(cache => {
-            console.log("Caching app files...");
             return Promise.all(
                 FILES_TO_CACHE.map(url =>
                     cache.add(url).catch(err => {
@@ -31,8 +25,6 @@ self.addEventListener("install", event => {
 });
 
 self.addEventListener("activate", event => {
-    console.log("Service Worker: Activated...");
-
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
@@ -47,33 +39,49 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
+    const req = event.request;
 
-    if (event.request.method !== "GET") {
+    if (req.method !== "GET") {
         return;
     }
 
-    event.respondWith(
-        caches.match(event.request).then(cachedResponse => {
+    const url = new URL(req.url);
 
-            
-            if (cachedResponse) {
-                return cachedResponse;
+    // Huwag galawin ang backend/API at ibang domain (Render, Firebase, atbp.)
+    if (url.origin !== self.location.origin || url.pathname.startsWith("/api/")) {
+        return;
+    }
+
+    // Pages: network muna, cache lang kapag offline
+    if (req.mode === "navigate") {
+        event.respondWith(
+            fetch(req)
+                .then(res => {
+                    if (res.ok) {
+                        const copy = res.clone();
+                        caches.open(CACHE_NAME).then(cache => cache.put("/index.html", copy));
+                    }
+                    return res;
+                })
+                .catch(() => caches.match("/index.html"))
+        );
+        return;
+    }
+
+    // Static files (JS, CSS, images): cache muna
+    event.respondWith(
+        caches.match(req).then(cached => {
+            if (cached) {
+                return cached;
             }
 
-            return fetch(event.request)
-                .then(networkResponse => {
-                    
-                    return caches.open(CACHE_NAME).then(cache => {
-                        cache.put(event.request, networkResponse.clone());
-                        return networkResponse;
-                    });
-                })
-                .catch(() => {
-                    
-                    console.warn("Fetch failed, walang cache at walang net:", event.request.url);
-                });
-
+            return fetch(req).then(res => {
+                if (res.ok) {
+                    const copy = res.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
+                }
+                return res;
+            });
         })
     );
-
 });
