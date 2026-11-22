@@ -33,6 +33,7 @@ import Reports from './pages/Reports.jsx';
 import Profile from './pages/Profile.jsx';
 import StudentPortal from './pages/StudentPortal.jsx';
 import StudentTable from './pages/StudentTable.jsx'; // NEW
+import Users from './pages/Users.jsx';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -236,6 +237,16 @@ export default function App() {
               <RequireAuth>
                 <Layout>
                   <Reports />
+                </Layout>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <RequireAuth>
+                <Layout>
+                  <Users />
                 </Layout>
               </RequireAuth>
             }

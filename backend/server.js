@@ -42,20 +42,48 @@ app.get('/', (req, res) => {
     res.json({ status: 'JPC Clinic backend is running' });
 });
 
-// ====== /api/user ======
+// ====== /api/user (User management: Admin / Nurse / Staff / Student) ======
+const USER_ROLES = ['Admin', 'Nurse', 'Staff', 'Student'];
+
 app.get('/api/user', async (req, res) => {
     try {
-        const [user] = await db.query('SELECT * FROM `user`');
-        res.json(user);
+        const [users] = await db.query('SELECT * FROM `user` ORDER BY user_id DESC');
+        res.json(users);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
 app.post('/api/user', async (req, res) => {
+    const name = (req.body.name || '').trim();
+    const role = req.body.role;
+
+    if (!name || !USER_ROLES.includes(role)) {
+        return res.status(400).json({ error: 'Kulang o maling data (name, role)' });
+    }
+
     try {
-        await db.query('INSERT INTO `user` (name, role) VALUES (?,?) ', [req.body.name, req.body.role]);
-        res.json({ message: 'User added' });
+        const [result] = await db.query('INSERT INTO `user` (name, role) VALUES (?, ?)', [name, role]);
+        res.status(201).json({ message: 'User added', user_id: result.insertId, name, role });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/user/:id', async (req, res) => {
+    const name = (req.body.name || '').trim();
+    const role = req.body.role;
+
+    if (!name || !USER_ROLES.includes(role)) {
+        return res.status(400).json({ error: 'Kulang o maling data (name, role)' });
+    }
+
+    try {
+        const [result] = await db.query('UPDATE `user` SET name = ?, role = ? WHERE user_id = ?', [name, role, req.params.id]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        res.json({ message: 'User updated', user_id: Number(req.params.id), name, role });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -63,17 +91,11 @@ app.post('/api/user', async (req, res) => {
 
 app.delete('/api/user/:id', async (req, res) => {
     try {
-        await db.query('DELETE FROM `user` WHERE user_id = ?', [req.params.id]);
+        const [result] = await db.query('DELETE FROM `user` WHERE user_id = ?', [req.params.id]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
         res.json({ message: 'User deleted' });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.put('/api/user/:id', async (req, res) => {
-    try {
-        await db.query('UPDATE `user` SET name = ?, role = ? WHERE user_id = ?', [req.body.name, req.body.role, req.params.id]);
-        res.json({ message: 'User updated' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
